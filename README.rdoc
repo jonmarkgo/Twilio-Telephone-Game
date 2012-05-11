@@ -8,19 +8,15 @@ It was written by @JonMarkGo for his workshop at Code Academy in Chicago
 
 1. heroku create --stack cedar mygameurl
 
-2. heroku config:add account_sid=YOUR_ACCOUNT_SID
+2. heroku config:add account_sid=YOUR_ACCOUNT_SID auth_token=YOUR_AUTH_TOKEN telephone_number=YOUR_TWILIO_NUMBER * make sure YOUR_TWILIO_NUMBER is in the format +16461234567
 
-3. heroku config:add auth_token=YOUR_AUTH_TOKEN
+3. git push heroku master
 
-4. heroku config:add telephone_number=YOUR_TWILIO_NUMBER
+4. heroku run rake db:migrate
 
-5. git push heroku master
+5. Set your Twilio SMS URL for the number that you entered to 'http://mygameurl.herokuapp.com/messenger/sms' and the method to POST
 
-6. heroku run rake db:migrate
-
-7. Set your Twilio SMS URL for the number that you entered to 'http://mygameurl.herokuapp.com/messenger/sms' and the method to POST
-
-8. All set to play!
+6. All set to play!
 
 == How to Play
 
