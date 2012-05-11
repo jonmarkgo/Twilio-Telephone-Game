@@ -97,52 +97,94 @@ class MessengerController < ApplicationController
     game.save
   end
 
-private
-  # user sms 'new <name>'
-  # Allows the player to create a new game
-  def sms_new(player, name)
-    if player.nil?
-      game = Game.new
-      game.save
-      player = Player.new
-      player.phone_number = params['From']
-      player.game = game
-      player.name = name
-      player.save
-      return "You have created game #{game.id} - tell your friends to TXT in 'Name #{game.id}' where Name is their first name."
-    else
-      return "You are already involved with a game, sorry."
-    end
-  end
-
-  # user sms 'start'
-  # starts the player's current game
-  def sms_start(player)
+  # POST /messenger/notify_player
+  # notify the player that the game is over, and play the first and last recordings for them
+  def notify_player
+    player = Player.find_by_phone_number(params['To'])
     game = player.game
-    if player.nil?
-      return "You can't start a game if you are not even playing!"
-    elsif player.first?
-      game.started = true
-      game.save
-      @call = @client.account.calls.create(
-        :from => ENV['telephone_number'],
-        :to => game.players.first.phone_number,
-        :url => url_for(:action => 'start_call', :controller => 'messenger')
-      )
-      return "Let the Twilio games begin!"
-    else
-      return "You did not create this game!"
+    response = Twilio::TwiML::Response.new do |r|
+      r.Say 'The game is over and the first and last phrases were ' + game.similarity.to_s + ' percent similar! Here is the first phrase from ' + game.players.first.name + '...'
+      r.Play game.first_recording
+      r.Say 'Here is the last phrase from ' + game.players.last.name + '...'
+      r.Play game.last_recording
+      r.Redirect url_for(:action => 'finish_notify', :controller => 'messenger')
     end
+    render :xml => response.text
   end
 
-  def sms_join(phone_number, name, game_id)
-    game = Game.find_by_id(game_id)
-    if game.nil? #no such game
-      return 'That game does not exist, to start a game TXT in "new Name" (where Name is your first name)'
-    else #game exists
-      player = Player.where(:phone_number => phone_number, :game_id => game_id).first_or_create(:name => name)
-      player.save
-      return "#{player.name} - You have joined Game #{game.id} - you will receive a phone call when it is your turn!"
+  # POST /messenger/finish_notify
+  # when the player is done being notified, destroy their DB entry so they can join another game
+  # we use a separate callback for this so that we don't accidentally delete the player mid-call if the code executes before Twilio is done!
+  def finish_notify
+    player = Player.find_by_phone_number(params['To'])
+    game = player.game
+    response = Twilio::TwiML::Response.new do |r|
+      r.Hangup
     end
+    render :xml => response.text
+    player.destroy
   end
+
+  private
+    # user sms 'new <name>'
+    # Allows the player to create a new game
+    def sms_new(player, name)
+      if player.nil?
+        game = Game.new
+        game.save
+        player = Player.new
+        player.phone_number = params['From']
+        player.game = game
+        player.name = name
+        player.save
+        return "You have created game #{game.id} - tell your friends to TXT in 'Name #{game.id}' where Name is their first name."
+      else
+        return "You are already involved with a game, sorry."
+      end
+    end
+
+    # user sms 'start'
+    # starts the player's current game
+    def sms_start(player)
+      game = player.game
+      if player.nil?
+        return "You can't start a game if you are not even playing!"
+      elsif player.first?
+        game.started = true
+        game.save
+        @call = @client.account.calls.create(
+          :from => ENV['telephone_number'],
+          :to => game.players.first.phone_number,
+          :url => url_for(:action => 'start_call', :controller => 'messenger')
+        )
+        return "Let the Twilio games begin!"
+      else
+        return "You did not create this game!"
+      end
+    end
+
+    # user sms 'name #'
+    # creates a new player entry and lets the user join a game
+    def sms_join(phone_number, name, game_id)
+      game = Game.find_by_id(game_id)
+      if game.nil? #no such game
+        return 'That game does not exist, to start a game TXT in "new Name" (where Name is your first name)'
+      else #game exists
+        player = Player.where(:phone_number => phone_number, :game_id => game_id).first_or_create(:name => name) #double check to make sure we don't have multiple players with the same #
+        player.save
+        return "#{player.name} - You have joined Game #{game.id} - you will receive a phone call when it is your turn!"
+      end
+    end
+
+    # loop through and call each of the players when the game is over
+    def notify_players(game)
+      @client = Twilio::REST::Client.new ENV['account_sid'], ENV['auth_token']
+      game.players.each do |player|
+        @call = @client.account.calls.create(
+          :from => ENV['telephone_number'],
+          :to => player.phone_number,
+          :url => url_for(:action => 'notify_player', :controller => 'messenger')
+        )
+      end
+    end
 end

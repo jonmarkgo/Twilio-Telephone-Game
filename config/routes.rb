@@ -8,6 +8,10 @@ TwilioTelephoneGame::Application.routes.draw do
 
   post "messenger/transcribe_call"
 
+  post "messenger/notify_player"
+  
+  post "messenger/finish_notify"
+
   # The priority is based upon order of creation:
   # first created -> highest priority.
 
