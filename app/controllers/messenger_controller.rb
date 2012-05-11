@@ -1,6 +1,7 @@
 class MessengerController < ApplicationController
 
-  # POST /messenger/sms - incoming request from Twilio
+  # POST /messenger/sms 
+  # incoming sms message from Twilio
   def sms
     #split the message so that the user can TXT in something like 'join 1' or 'register Jon'
     message = params['Body'].split(" ")
@@ -25,6 +26,37 @@ class MessengerController < ApplicationController
     
     response = Twilio::TwiML::Response.new do |r|
       r.Sms reply
+    end
+    render :xml => response.text
+  end
+
+  # POST /messenger/start_call
+  # Voice TwiML route for when a player's turn is up
+  def start_call
+    player = Player.find_by_phone_number(params['To'])
+    if player.first?
+      response = Twilio::TwiML::Response.new do |r|
+        r.Say "Say your most clever sentence after the beep, press pound to finish!"
+        r.Record :action => url_for(:action => 'end_call', :controller => 'messenger'), :transcribe => true, :transcribeCallback => url_for(:action => 'transcribe_call', :controller => 'messenger'), :finishOnKey => '#'
+      end
+
+    else
+      prev_player = player.higher_item
+      response = Twilio::TwiML::Response.new do |r|
+        r.Say "It is your turn in telephone! Here is the previous player..."
+        r.Play prev_player.recording_url
+        r.Say "Now record what you heard after the beep, press pound to finish"
+        r.Record :action => url_for(:action => 'end_call', :controller => 'messenger'),  :transcribe => true, :transcribeCallback => url_for(:action => 'transcribe_call', :controller => 'messenger'), :finishOnKey => '#'
+      end
+    end
+    render :xml => response.text
+  end
+
+  # POST /messenger/end_call
+  # Voice TwiML route to confirm that a player's recording has been saved
+  def end_call
+    response = Twilio::TwiML::Response.new do |r|
+      r.Say "Thanks, we will call you back when the game is over!"
     end
     render :xml => response.text
   end
