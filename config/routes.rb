@@ -1,5 +1,7 @@
 TwilioTelephoneGame::Application.routes.draw do
 
+  post "messenger/sms"
+
   # The priority is based upon order of creation:
   # first created -> highest priority.
 
