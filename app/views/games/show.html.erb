@@ -1,0 +1,40 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <b>First transcription:</b>
+  <%= @game.first_transcription %>
+</p>
+
+<p>
+  <b>Last transcription:</b>
+  <%= @game.last_transcription %>
+</p>
+
+<p>
+  <b>First recording:</b>
+  <%= @game.first_recording %>
+</p>
+
+<p>
+  <b>Last recording:</b>
+  <%= @game.last_recording %>
+</p>
+
+<p>
+  <b>Similarity:</b>
+  <%= @game.similarity %>
+</p>
+
+<p>
+  <b>Started:</b>
+  <%= @game.started %>
+</p>
+
+<p>
+  <b>Finished:</b>
+  <%= @game.finished %>
+</p>
+
+
+<%= link_to 'Edit', edit_game_path(@game) %> |
+<%= link_to 'Back', games_path %>

@@ -1,0 +1,35 @@
+<h1>Listing games</h1>
+
+<table>
+  <tr>
+    <th>First transcription</th>
+    <th>Last transcription</th>
+    <th>First recording</th>
+    <th>Last recording</th>
+    <th>Similarity</th>
+    <th>Started</th>
+    <th>Finished</th>
+    <th></th>
+    <th></th>
+    <th></th>
+  </tr>
+
+<% @games.each do |game| %>
+  <tr>
+    <td><%= game.first_transcription %></td>
+    <td><%= game.last_transcription %></td>
+    <td><%= game.first_recording %></td>
+    <td><%= game.last_recording %></td>
+    <td><%= game.similarity %></td>
+    <td><%= game.started %></td>
+    <td><%= game.finished %></td>
+    <td><%= link_to 'Show', game %></td>
+    <td><%= link_to 'Edit', edit_game_path(game) %></td>
+    <td><%= link_to 'Destroy', game, confirm: 'Are you sure?', method: :delete %></td>
+  </tr>
+<% end %>
+</table>
+
+<br />
+
+<%= link_to 'New Game', new_game_path %>

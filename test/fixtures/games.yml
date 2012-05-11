@@ -1,0 +1,19 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/Fixtures.html
+
+one:
+  first_transcription: MyText
+  last_transcription: MyText
+  first_recording: MyString
+  last_recording: MyString
+  similarity: 1
+  started: false
+  finished: false
+
+two:
+  first_transcription: MyText
+  last_transcription: MyText
+  first_recording: MyString
+  last_recording: MyString
+  similarity: 1
+  started: false
+  finished: false
