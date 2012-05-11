@@ -147,19 +147,23 @@ class MessengerController < ApplicationController
     # starts the player's current game
     def sms_start(player)
       game = player.game
-      if player.nil?
-        return "You can't start a game if you are not even playing!"
-      elsif player.first?
-        game.started = true
-        game.save
-        @call = @client.account.calls.create(
-          :from => ENV['telephone_number'],
-          :to => game.players.first.phone_number,
-          :url => url_for(:action => 'start_call', :controller => 'messenger')
-        )
-        return "Let the Twilio games begin!"
+      if game.started == true
+        return "That game has already started!"
       else
-        return "You did not create this game!"
+        if player.nil?
+          return "You can't start a game if you are not even playing!"
+        elsif player.first?
+          game.started = true
+          game.save
+          @call = @client.account.calls.create(
+            :from => ENV['telephone_number'],
+            :to => game.players.first.phone_number,
+            :url => url_for(:action => 'start_call', :controller => 'messenger')
+          )
+          return "Let the Twilio games begin!"
+        else
+          return "You did not create this game!"
+        end
       end
     end
 
