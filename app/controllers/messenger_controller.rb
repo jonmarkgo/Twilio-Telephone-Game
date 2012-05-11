@@ -15,7 +15,11 @@ class MessengerController < ApplicationController
     if command == 'new'
       reply = sms_new(player, args)
     elsif command == 'start'
-      reply = sms_start(player)
+      if player.nil?
+        reply = sms_start(player)
+      else
+        reply = "You cannot start a game unless you have created one!"
+      end
     else #when the user texts in 'Name #' to join a game
       if player.nil?
         reply = sms_join(params['From'], command, args.to_i)
