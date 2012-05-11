@@ -1,0 +1,15 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/Fixtures.html
+
+one:
+  game: 
+  phone_number: MyString
+  position: 1
+  name: MyString
+  recording_url: MyString
+
+two:
+  game: 
+  phone_number: MyString
+  position: 1
+  name: MyString
+  recording_url: MyString
