@@ -61,6 +61,42 @@ class MessengerController < ApplicationController
     render :xml => response.text
   end
 
+  # POST /messenger/transcribe_call
+  # the callback Twilio hits when transcription is complete
+  # this kicks off the next player's turn!
+  def transcribe_call
+    @client = Twilio::REST::Client.new ENV['account_sid'], ENV['auth_token']
+
+    player = Player.find_by_phone_number(params['To'])
+    player.recording_url = params['RecordingUrl']
+    player.save
+    game = player.game
+
+    if player.first?
+      game.first_transcription = params['TranscriptionText']
+      game.first_recording = params['RecordingUrl']
+    elsif player.last?
+      game.last_transcription = params['TranscriptionText']
+      game.last_recording = params['RecordingUrl']
+      white = Text::WhiteSimilarity.new # get similarity index between first and last transcriptions, mostly just for fun
+      sim = white.similarity(game.first_transcription, game.last_transcription)
+      game.similarity = (sim * 100).ceil #convert the decimal toa percent value
+      game.finished = true #bam, game is over!
+      notify_players(game)
+    end
+
+    unless player.last? #go to the next player's turn, unless there are no more players
+      next_player = player.lower_item
+      @call = @client.account.calls.create(
+        :from => ENV['telephone_number'],
+        :to => next_player.phone_number,
+        :url => url_for(:action => 'start_call', :controller => 'messenger')
+      )
+    end
+
+    game.save
+  end
+
 private
   # user sms 'new <name>'
   # Allows the player to create a new game
