@@ -8,7 +8,8 @@ It was written by @JonMarkGo for his workshop at Code Academy in Chicago
 
 1. heroku create --stack cedar mygameurl
 
-2. heroku config:add account_sid=YOUR_ACCOUNT_SID auth_token=YOUR_AUTH_TOKEN telephone_number=YOUR_TWILIO_NUMBER * make sure YOUR_TWILIO_NUMBER is in the format +16461234567
+2. heroku config:add account_sid=YOUR_ACCOUNT_SID auth_token=YOUR_AUTH_TOKEN telephone_number=YOUR_TWILIO_NUMBER
+   (make sure YOUR_TWILIO_NUMBER is in the format +16461234567)
 
 3. git push heroku master
 
