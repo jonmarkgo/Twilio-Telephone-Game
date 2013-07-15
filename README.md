@@ -30,3 +30,4 @@ It was written by @JonMarkGo for his workshop at Code Academy in Chicago
 4. ???
 
 5. FUN!
+[![githalytics.com alpha](https://cruel-carlota.pagodabox.com/6f3b664857e61f96fbaf74f601421263 "githalytics.com")](http://githalytics.com/jonmarkgo/Twilio-Telephone-Game)
